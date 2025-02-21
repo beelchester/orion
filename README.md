@@ -30,7 +30,7 @@ If Aria2 is not installed, refer to the [Aria2 Installation Guide](https://aria2
 Open **Terminal 2** and run:
 
 ```bash
-wails dev -tags webkit2_41
+wails dev
 ```
 
 If Wails is not installed, refer to the [Wails Installation Guide](https://wails.io/docs/gettingstarted/installation).
