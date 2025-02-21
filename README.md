@@ -1,16 +1,25 @@
-# README
+# Orion
 
-## About
+Download manager for all your needs.
 
-This is the official Wails Svelte-TS template.
+## Development
 
-## Live Development
+### Running the Project
 
-To run in live development mode, run `wails dev` in the project directory. This will run a Vite development
-server that will provide very fast hot reload of your frontend changes. If you want to develop in a browser
-and have access to your Go methods, there is also a dev server that runs on http://localhost:34115. Connect
-to this in your browser, and you can call your Go code from devtools.
+#### Step 1: Start Aria2 rpc service
 
-## Building
+```bash
+aria2c --enable-rpc --rpc-listen-all
+```
 
-To build a redistributable, production mode package, use `wails build`.
+If Aria2 is not installed, refer to the [Aria2 Installation Guide](https://aria2.github.io/).
+
+#### Step 2: Start Wails
+
+In another shell run:
+
+```bash
+wails dev
+```
+
+If Wails is not installed, refer to the [Wails Installation Guide](https://wails.io/docs/gettingstarted/installation).
