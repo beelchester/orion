@@ -65,6 +65,6 @@ func main() {
 		},
 	})
 	if err != nil {
-		log.Println("Error:", err.Error())
+		println("Error:", err.Error())
 	}
 }
