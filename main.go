@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -15,8 +16,24 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
+// Check if aria2c is already running
+func IsAria2cRunning() bool {
+	cmd := exec.Command("pgrep", "-x", "aria2c")
+	output, err := cmd.Output()
+	if err != nil {
+		// If pgrep returns an error, aria2c is not running
+		return false
+	}
+	// If there is any output, aria2c is running
+	return strings.TrimSpace(string(output)) != ""
+}
 
 func StartAria2c() (*exec.Cmd, error) {
+	if IsAria2cRunning() {
+		fmt.Println("Aria2c is already running. Skipping start.")
+		return nil, nil
+	}
+
 	cmd := exec.Command("aria2c", "--enable-rpc", "--rpc-listen-all")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -38,14 +55,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// killed when the app terminate
+	// Killed when the app terminates
 	defer func() {
 		if aria2cCmd != nil {
 			fmt.Println("❌ Stopping Aria2c...")
 			aria2cCmd.Process.Kill()
 		}
 	}()
-
 
 	// Create an instance of the app structure
 	app := NewApp()
