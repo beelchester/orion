@@ -5,3 +5,7 @@
 export function Download(arg1) {
   return window['go']['main']['App']['Download'](arg1);
 }
+
+export function GetDownloadProgress(arg1) {
+  return window['go']['main']['App']['GetDownloadProgress'](arg1);
+}
