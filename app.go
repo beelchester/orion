@@ -92,3 +92,62 @@ func (a *App) GetDownloadProgress(gid string) (*DownloadProgressInfo, error) {
 	
 	return info, nil
 }
+
+// PauseDownload pauses a download using its GID
+func (a *App) PauseDownload(gid string) error {
+	if gid == "" {
+		return fmt.Errorf("invalid GID")
+	}
+	
+	c, err := arigo.Dial("ws://localhost:6800/jsonrpc", "")
+	if err != nil {
+		return err
+	}
+	
+	// Pause the download
+	err = c.Pause(gid)
+	if err != nil {
+		return err
+	}
+	
+	return nil
+}
+
+// resumes a paused download
+func (a *App) ResumeDownload(gid string) error {
+	if gid == "" {
+		return fmt.Errorf("invalid GID")
+	}
+	
+	c, err := arigo.Dial("ws://localhost:6800/jsonrpc", "")
+	if err != nil {
+		return err
+	}
+	
+	// Unpause/resume the download
+	err = c.Unpause(gid)
+	if err != nil {
+		return err
+	}
+	
+	return nil
+}
+
+// cancels and removes a download
+func (a *App) CancelDownload(gid string) error {
+	if gid == "" {
+		return fmt.Errorf("invalid GID")
+	}
+	
+	c, err := arigo.Dial("ws://localhost:6800/jsonrpc", "")
+	if err != nil {
+		return err
+	}
+	
+	err = c.Remove(gid)
+	if err != nil {
+		return err
+	}
+	
+	return nil
+}
