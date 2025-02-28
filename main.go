@@ -76,8 +76,9 @@ func main() {
 	app := NewApp()
 	if err := wails.Run(&options.App{
 		Title:            "orion",
-		Width:            1024,
-		Height:           768,
+		Width:            800,
+		Height:           510,
+		DisableResize:    true,
 		AssetServer:      &assetserver.Options{Assets: assets},
 		BackgroundColour: &options.RGBA{R: 0, G: 0, B: 0, A: 1},
 		OnStartup:        app.startup,
