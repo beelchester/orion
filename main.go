@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/shirou/gopsutil/v3/process"
@@ -14,7 +15,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 )
 
-//go:embed all:frontend/dist
+// go:embed all:frontend/dist
 var assets embed.FS
 
 func isProcessRunning(name string) (bool, error) {
@@ -33,7 +34,7 @@ func isProcessRunning(name string) (bool, error) {
 	return false, nil
 }
 
-func startAria2c() (*exec.Cmd, error) {
+func startAria2c(downloadDir string) (*exec.Cmd, error) {
 	running, err := isProcessRunning("aria2c")
 	if err != nil {
 		return nil, err
@@ -42,7 +43,14 @@ func startAria2c() (*exec.Cmd, error) {
 		err := fmt.Errorf("aria2c is already running")
 		return nil, err
 	} else {
-		cmd := exec.Command("aria2c", "--enable-rpc", "--rpc-listen-all")
+		args := []string{"--enable-rpc", "--rpc-listen-all"}
+
+		// add download dir if specified
+		if downloadDir != "" {
+			args = append(args, "--dir="+downloadDir)
+		}
+
+		cmd := exec.Command("aria2c", args...)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 
@@ -55,7 +63,16 @@ func startAria2c() (*exec.Cmd, error) {
 }
 
 func main() {
-	aria2cCmd, err := startAria2c()
+	// set default download dir(user's home download folder)
+	homeDir, _ := os.UserHomeDir()
+	defaultDir := filepath.Join(homeDir, "Downloads")
+
+	// if dir doesnt exist, back to home dir
+	if _, err := os.Stat(defaultDir); os.IsNotExist(err) {
+		defaultDir = homeDir
+	}
+
+	aria2cCmd, err := startAria2c(defaultDir)
 	if err != nil {
 		if err.Error() == "aria2c is already running" {
 			println("✅ aria2c is already running")
@@ -74,6 +91,7 @@ func main() {
 	}
 
 	app := NewApp()
+	app.downloadDir = defaultDir
 	if err := wails.Run(&options.App{
 		Title:            "orion",
 		Width:            800,

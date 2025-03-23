@@ -10,6 +10,10 @@ export function Download(arg1) {
   return window['go']['main']['App']['Download'](arg1);
 }
 
+export function GetDownloadDirectory() {
+  return window['go']['main']['App']['GetDownloadDirectory']();
+}
+
 export function GetDownloadProgress(arg1) {
   return window['go']['main']['App']['GetDownloadProgress'](arg1);
 }
@@ -20,4 +24,8 @@ export function PauseDownload(arg1) {
 
 export function ResumeDownload(arg1) {
   return window['go']['main']['App']['ResumeDownload'](arg1);
+}
+
+export function SetDownloadDirectory() {
+  return window['go']['main']['App']['SetDownloadDirectory']();
 }
