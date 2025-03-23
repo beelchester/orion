@@ -3,13 +3,19 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"github.com/beelchester/arigo"
 )
 
 // App struct
 type App struct {
 	ctx context.Context
+	downloadDir		string
+	aria2cCmd		*exec.Cmd
 }
 
 // DownloadProgressInfo contains all progress information
@@ -23,12 +29,75 @@ type DownloadProgressInfo struct {
 
 // NewApp creates a new App application struct
 func NewApp() *App {
-	return &App{}
+	homeDir, err := os.UserHomeDir()
+	defaultDir := filepath.Join(homeDir, "Downloads")
+
+	if err != nil {
+		if _, err := os.Stat(defaultDir); os.IsNotExist(err) {
+			defaultDir = homeDir
+		}
+	} else {
+		defaultDir, _ = os.Getwd()
+	}
+	return &App{
+		downloadDir: defaultDir,
+	}
 }
 
 // startup is called when the app starts
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+
+	cmd, err := startAria2c(a.downloadDir)
+
+	if err != nil {
+		if err.Error() == "aria2c is already running" {
+			println("aria2c is already running")
+		} else {
+			fmt.Printf("Error: aria2c couldn't start: %v\n", err)
+		}
+	} else {
+		a.aria2cCmd = cmd
+	}
+}
+
+func(a *App) GetDownloadDirectory() string {
+	return a.downloadDir
+}
+
+func (a *App) SetDownloadDirectory() (string, error) {
+
+	//open dir selection dialog
+	dir, err := runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
+		Title: "Select Download Directory",
+        DefaultDirectory: a.downloadDir,
+	})
+
+	if err != nil {
+		return "", err
+	}
+	if dir == "" {
+		return a.downloadDir, nil
+	}
+
+	//update download dir
+	a.downloadDir  = dir
+
+
+	// restart aria2c with new directory
+	if a.aria2cCmd != nil {
+		fmt.Println("Restarting Aria2c with new directory...")
+		a.aria2cCmd.Process.Kill()
+
+		cmd, err := startAria2c(a.downloadDir)
+		if err != nil {
+			return "", fmt.Errorf("failed to restart aria2c: %v", err)
+		}
+
+		a.aria2cCmd = cmd
+	}
+
+	return a.downloadDir, nil
 }
 
 func (a *App) Download(url string) string {
@@ -38,9 +107,13 @@ func (a *App) Download(url string) string {
 		panic(err)
 	}
 
+	options := &arigo.Options{
+		Dir: a.downloadDir,
+	}
+
 	// Just add the URI without waiting for completion
 	// this will immediately return the GID 
-	gid, err := c.AddURI([]string{url}, nil)
+	gid, err := c.AddURI([]string{url}, options)
 	
 	if err != nil {
 		errMsg := err.Error()

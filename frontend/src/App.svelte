@@ -4,7 +4,10 @@
     GetDownloadProgress, 
     PauseDownload, 
     ResumeDownload, 
-    CancelDownload 
+    CancelDownload,
+    GetDownloadDirectory, 
+    SetDownloadDirectory 
+
   } from '../wailsjs/go/main/App.js';
   import './App.css';
   
@@ -21,6 +24,8 @@
   let showProgress = false;
   let estimatedTimeLeft = "calculating...";
   let startTime = 0;
+  let downloadDir = "";
+  let showSettings = false;
   
   // converting bytes into human-readable format
   function formatBytes(bytes, decimals = 2) {
@@ -190,11 +195,34 @@
       }
     }
   }
+
+  async function loadDownloadDirectory() {
+  try {
+    downloadDir = await GetDownloadDirectory();
+  } catch (error) {
+    console.error("Failed to get download directory:", error);
+  }
+}
+
+
+  loadDownloadDirectory();
+
+  async function changeDownloadDirectory() {
+  try {
+    downloadDir = await SetDownloadDirectory();
+  } catch (error) {
+    console.error("Failed to set download directory:", error);
+  }
+}
 </script>
  
 <main>
   <div class="app-container">
+    <div class="app-header">
     <h1 class="app-title">Orion</h1>
+    <button class="settings-btn" on:click={() => showSettings = !showSettings}>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+  </div>
     
     <div class="input-container">
       <div class="url-input-wrapper">
@@ -289,5 +317,29 @@
       </div>
     {/if}
   </div>
+
+  {#if showSettings}
+<div class="settings-panel">
+  <h2>Settings</h2>
+  
+  <div class="settings-section">
+    <h3>Download Directory</h3>
+    <div class="directory-selector">
+      <div class="current-dir">
+        <span class="dir-path" title={downloadDir}>{downloadDir}</span>
+        <button class="change-dir-btn" on:click={changeDownloadDirectory}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>
+          Change
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <button class="close-settings" on:click={() => showSettings = false}>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    Close Settings
+  </button>
+</div>
+{/if}
 </main>
  

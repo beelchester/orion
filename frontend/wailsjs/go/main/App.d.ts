@@ -6,8 +6,12 @@ export function CancelDownload(arg1:string):Promise<void>;
 
 export function Download(arg1:string):Promise<string>;
 
+export function GetDownloadDirectory():Promise<string>;
+
 export function GetDownloadProgress(arg1:string):Promise<main.DownloadProgressInfo>;
 
 export function PauseDownload(arg1:string):Promise<void>;
 
 export function ResumeDownload(arg1:string):Promise<void>;
+
+export function SetDownloadDirectory():Promise<string>;
